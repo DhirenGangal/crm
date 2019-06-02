@@ -1,0 +1,7 @@
+Main Product Name,Sub Product,Product Model,Manufacture No,Product Image,Sub Product Image,DataSheet,HSN Code,GST%,MRP,Discount,Price Range,Dealer Price,Has Mac ID,Description,Product Status
+Product-2,SwitchBoard,P7+1,12345,dfsfds,/sakdhsakh,hkhkj,4646,18,7000,10,1-10,7000,NO,adhsakdhaksdhsa,PUBLIC
+Product-1,SwitchBoard,P5+1,12345,dfsfds,/sakdhsakh,hkhkj,4646,18,6000,10,1-10,6000,NO,adhsakdhaksdhsa,PUBLIC
+Product-1,SwitchBoard,P4+1,12345,dfsfds,/sakdhsakh,hkhkj,4646,18,5000,10,1-10,5000,NO,adhsakdhaksdhsa,PUBLIC
+Product-1,Server,SR3110,12345,/sakdhsakh,/sakdhsakh,/sakdhsakh,789456,28,20000,15,1-10,20000,YES,sdjasljdaldj as dosajd,PUBLIC
+Product-2,Server,SR2110,12345,asdasddsa/dsa/sadsadsa,/dsfsdfsdfds,sadsadsasadsa/dsad,852,28,15000,15,1-10,15000,YES,jdhakshdakshdsakjd,PRIVATE
+Product-3,Server,SR1110,12345,print13.png,sub-product2019-04-26.png,print13.pdf,123,28,10000,15,1-10,10000,YES,<p>Test Discription</p>,PRIVATE

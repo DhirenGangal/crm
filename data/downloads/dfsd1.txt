@@ -1,0 +1,25 @@
+Hi,
+
+Admin : 
+
+http://futurepointtech.com/administrator/index.php
+
+admin111
+
+FPT89%$^#27
+
+
+Procedure :  
+
+Menu -> Course Menu ->  open existing item and save as copy -> then update with new Information. 
+
+
+Single Article-> Assign Article for Menu.
+
+
+Article Creation: 
+
+Content -> Article Manager  ->  New -> 
+
+
+Module Assign : Extensions  -> Module Manager  -> Course.

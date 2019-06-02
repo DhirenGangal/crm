@@ -1,0 +1,253 @@
+.login-page{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+.error{
+    color:#FA8072;
+}
+textarea {
+    resize: none;
+}
+.text-white{
+    color:#fff !important;
+}
+.btn,.form-control{
+    border-radius: 0 !important;
+}
+.profile-pic{
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+    padding: 3px;
+    border: 3px solid #d2d6de;
+}
+th {
+    vertical-align: middle !important;
+}
+.img-table{
+    width:70px;
+    height: 50px;
+}
+.skin-purple .sidebar-menu>li.header {
+    color: #fff;
+    font-size: 16px;
+    background: #1a2226;
+    font-weight: 800;
+}
+.form-horizontal .radio{
+    padding-top: 4px !important;
+}
+.form-img{
+    height:120px;
+}
+.product-pic{
+    padding: 5px;
+    height: 150px;
+    width: 150px;
+    border: 3px solid #d2d6de;
+}
+#password{
+    padding-right:29px;
+}
+#eye{
+    font-size: 15px;
+    cursor: pointer;
+    float: right;
+    margin-top: -24px;
+    margin-right: 12px;
+    color: #777;
+}
+.agreement-block {
+    height: 200px;
+    overflow-y: auto;
+    padding: 10px 25px;
+    margin-bottom: 25px !important;
+}
+
+.has-feedback label ~ .form-control-feedback {
+    top: 0;
+}
+
+.agreement-block p {
+    font-size: 15px;
+    line-height: 25px;
+}
+a.privacy {
+    color: #0415dc;
+}
+.modal-img{
+    max-width: 100%;
+    height:250px;
+
+}
+
+.m-t-7p{
+    margin-top: 7%;
+}
+.label-status{
+    font-size: 100% !important;
+}
+.close {
+    color: red !important;
+    opacity: 1.3 !important;
+    font-size: 30px !important;
+    margin-top: -8px !important;
+}
+.close:hover {
+    color: red;
+    opacity: 1.3;
+    font-size: 30px;
+}
+.w-8{
+    width: 8%;
+}
+.w-50{
+    width: 50% !important;
+}
+.w-10{
+    width: 10% !important;
+}
+.w-15{
+    width: 15% !important;
+}
+.w-25{
+    width: 25% !important;
+}
+.w-20{
+    width: 20% !important;
+}
+.w-100{
+    width: 100% !important;
+}
+.navbar-nav>.notifications-menu>.dropdown-menu{
+    width: 400px !important;
+}
+.font-amnt,.final_total, .fa-inr-icon{
+    font-size: 20px;
+}
+.final_total{
+    font-weight: 600;
+
+}
+#product_details .modal-header{
+    background-color: #ebe5e55e;
+}
+#product_details .modal-header{
+    padding: 5px 30px !important;
+}
+#product_details .panel a{
+    font-size: 14px;
+    font-weight: 500;
+}
+#product_details{
+    position: absolute;
+    top:20%;
+    right:20%;
+}
+.cart-title{
+    background: #c6bebe;
+    font-weight: 600;
+    padding: 5px 10px;
+    margin-top: 0;
+}
+.box{
+    border-top:0 !important;
+}
+th{
+    vertical-align: middle !important;
+}
+.image-link {
+    cursor: -webkit-zoom-in;
+    cursor: -moz-zoom-in;
+    cursor: zoom-in;
+}
+
+
+/* This block of CSS adds opacity transition to background */
+.mfp-with-zoom .mfp-container,
+.mfp-with-zoom.mfp-bg {
+    opacity: 0;
+    -webkit-backface-visibility: hidden;
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+}
+
+.mfp-with-zoom.mfp-ready .mfp-container {
+    opacity: 1;
+}
+.mfp-with-zoom.mfp-ready.mfp-bg {
+    opacity: 0.8;
+}
+
+.mfp-with-zoom.mfp-removing .mfp-container,
+.mfp-with-zoom.mfp-removing.mfp-bg {
+    opacity: 0;
+}
+
+
+
+/* padding-bottom and top for image */
+.mfp-no-margins img.mfp-img {
+    padding: 0;
+}
+/* position of shadow behind the image */
+.mfp-no-margins .mfp-figure:after {
+    top: 0;
+    bottom: 0;
+}
+/* padding for main container */
+.mfp-no-margins .mfp-container {
+    padding: 0;
+}
+
+
+
+/* aligns caption to center */
+.mfp-title {
+    text-align: center;
+    padding: 6px 0;
+}
+.image-source-link {
+    color: #DDD;
+}
+.mfp-close {
+    width: 50px !important;
+    height: 50px !important;
+    line-height: 50px !important;
+    position: absolute;
+    right: 0;
+    top: 0;
+    text-decoration: none;
+    text-align: center;
+    opacity: .65;
+    padding: 0 0 18px 10px;
+    color: red !important;
+    font-style: normal;
+    font-size: 50px !important;
+    font-family: Arial,Baskerville,monospace;
+}
+
+
+.hvr-sweep-to-right:before {
+    background: #605ca8 !important;
+}
+.hvr-rectangle-out{
+    background-color: #f39c12 !important;
+}
+.hvr-rectangle-out:before{
+     background: #34a853 !important;
+ }
+.toggle-col{
+    padding:10px 0 20px 0;
+    text-align: center;
+}
+.ui-autocomplete{
+    background: #d0d0d0;
+    border: 1px solid #dadada;
+}
+.ui-menu .ui-menu-item{
+    border-bottom: 1px solid #eee;
+}
