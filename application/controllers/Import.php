@@ -448,48 +448,35 @@ class Import extends MY_Controller {
 
 		$query = $this->db->query($SQL);
 		$result = $query->result_array();
-		// echo "<pre>";
-		// print_r($result);exit;
-		header("Cache-Control: max-age=0");
-		header("Content-Disposition: attachment; filename=$filename"); //File name extension was wrong
-		header("Expires: 0");
-		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-		header("Cache-Control: private", false);
-		$sep = "\t";
+		$delimiter = ",";
 		$fields = ["Main Product Name", "Sub Product", "Product Model", "Manufacture No", "Product Image", "Sub Product Image",
 			"DataSheet", "HSN Code", "HSN Description", "GST%", "MRP", "Discount", "Price Range", "Dealer Price", "Has Mac ID", "Description", "Product Status"];
-		foreach ($fields as $field) {
-			echo $field . "\t";
-		}
+		
+		$f = fopen('php://memory', 'w');
+
+		fputcsv($f, $fields, $delimiter);
+
 		foreach ($result as $key => $row) {
-			$schema_insert = "";
 			$datasheet_path = (!empty($row['datasheet_path']) ? $row['datasheet_path'] : '#');
-			$product_url = !empty($row['product_image']) ? $row['product_image'] : '#';
 			$sub_product_url = !empty($row['sub_product_image']) ? $row['sub_product_image'] : '#';
-			$schema_insert .= $row['main_product_name'] . $sep;
-			$schema_insert .= $row['sub_product_name'] . $sep;
-			$schema_insert .= $row['product_name'] . $sep;
-			$schema_insert .= $row['mfr_no'] . $sep;
-			$schema_insert .= $product_url . $sep;
-			$schema_insert .= $sub_product_url . $sep;
-			$schema_insert .= $datasheet_path . $sep;
-			$schema_insert .= $row['hsn_code'] . $sep;
-			$schema_insert .= $row['hsn_description'] . $sep;
-			$schema_insert .= $row['gst'] . $sep;
-			$schema_insert .= $row['mrp_price'] . $sep;
-			$schema_insert .= $row['discount'] . $sep;
-			$schema_insert .= $row['price_range'] . $sep;
-			$schema_insert .= $row['dealer_price'] . $sep;
-			$schema_insert .= $row['has_mac_id'] . $sep;
-			$schema_insert .= $row['description_1'] . $sep;
-			$schema_insert .= $row['status'] . $sep;
-			print("\n");
-			$schema_insert = str_replace($sep . "$", "", $schema_insert);
-			$schema_insert = preg_replace("/\r\n|\n\r|\n|\r/", " ", $schema_insert);
-			$schema_insert .= "\t";
-			print(trim($schema_insert));
+			$product_url = !empty($row['product_image']) ? $row['product_image'] : '#';
+			$schema_insert = array(
+				$row['main_product_name'], $row['sub_product_name'], $row['product_name'],
+				$row['mfr_no'], $product_url, $sub_product_url, $datasheet_path, $row['hsn_code'] ,$row['hsn_description'], $row['gst'],$row['mrp_price'],$row['discount'] , $row['price_range'], $row['dealer_price'], $row['has_mac_id'],$row['description_1'],$row['status']
+			);
+			fputcsv($f, $schema_insert, $delimiter);
 		}
-		print "\n";
+
+		 //move back to beginning of file
+		 fseek($f, 0);
+    
+		 //set headers to download file rather than displayed
+		 header('Content-Type: text/csv');
+		 header('Content-Disposition: attachment; filename="' . $filename . '";');
+		 
+		 //output all remaining data on a file pointer
+		 fpassthru($f);
+		 
 	}
 	/**
 	 * @Import product using excel file or csv file
