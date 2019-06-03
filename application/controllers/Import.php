@@ -338,84 +338,7 @@ class Import extends MY_Controller {
 			fputcsv($output, $csv_row);
 		}
 	}
-
-	/*PRODUCTS*/
-
-	function import_products() {
-		$data = array();
-		$this->header_data['title'] = 'Import Products';
-		// if (!empty($_POST['import'])) {
-		//     $file_name = date("YmdHis");
-		//     $upload_path = FCPATH . '/data/tmp/';
-		//     if (!file_exists($upload_path) || !is_dir($upload_path)) {
-		//         mkdir($upload_path);
-		//     }
-		//     $file_info = pathinfo($_FILES['import_csv']['name']);
-		//     $csv_file_path = $upload_path . $file_name . "." . $file_info['extension'];
-		//     @move_uploaded_file($_FILES["import_csv"]["tmp_name"], $csv_file_path);
-		//     $csv_file = fopen($csv_file_path, "r");
-		//     fgetcsv($csv_file);
-		//     /**** First get all product name from database ****/
-		//     $products = $this->master_model->select_data("product_id,LCASE(product_name) name,is_active","tbl_products");
-		//     /**** Create single array of product name ****/
-		//     $productsNameArray = array_column($products, 'name');
-		//     $insertProductArray = [];
-		//     $updateProductArray = [];
-		//     while (!feof($csv_file)) {
-		//         $row = fgetcsv($csv_file);
-
-		//         if (!empty($row[1])) {
-		//             //product_id`, `product_name`, `product_url`, `parent_id`, `path_id`, `product_logo`, `seo_title`, `seo_keywords`, `seo_description`, `order_no`, `created_on`, `is_active`
-		//             $pData = [];
-		//             $spData = [];
-		//             $cpData = [];
-		//             $product_name = !empty($row[0]) ? $row[0] : "";
-		//             $pData['product_name'] = trim(strtolower($product_name));
-
-		//             if (in_array($pData['product_name'], $productsNameArray)) {
-		//                 $product_id = $mproduct['product_id']; // Product is alredy Exists
-		//             } else {
-		//                 $product_id = $this->dbapi->addProduct(['product_name' => $product_name]); // New Product
-		//             }
-		//             if (!empty($product_id)) {
-		//                 $sproduct_name = !empty($row[1]) ? $row[1] : "";
-		//                 $sparent_id = $product_id;
-		//                 $sproduct = $this->dbapi->getProductDetailsByName($sproduct_name);
-		//                 if (!empty($sproduct)) {
-		//                     $sproduct_id = $sproduct['product_id'];
-		//                 } else {
-		//                     $sproduct_id = $this->dbapi->addProduct(['product_name' => $sproduct_name, 'parent_id' => $sparent_id]);
-		//                 }
-		//                 if (!empty($sproduct_id)) {
-		//                     $csproduct_name = !empty($row[2]) ? $row[2] : "";
-		//                     $csproduct_id = $this->dbapi->addProduct(['product_name' => $csproduct_name, 'parent_id' => $sproduct_id]);
-		//                     $pdata['product_id'] = $csproduct_id;
-		//                     $pdata['mfr_no'] = !empty($row[3]) ? $row[3] : '';
-		//                     $pdata['hsn_code'] = !empty($row[4]) ? $row[4] : '';
-		//                     $pdata['mrp_price'] = !empty($row[5]) ? $row[5] : '';
-		//                     $pdata['gst'] = !empty($row[6]) ? $row[6] : '';
-		//                     $pdata['discount'] = !empty($row[7]) ? $row[7] : '';
-		//                     $pdata['description_1'] = !empty($row[8]) ? $row[8] : '';
-		//                     $this->dbapi->addChildProductInfo($pdata);
-		//                 }
-		//             } else {
-		//                 $error = "";
-		//                 $error .= "Failed to import data because of following reasons";
-		//                 $error .= "<div class='container'><ul><li>Field  already exists  !</li>";
-		//                 $error .= "<li>CSV data mismatched or something wrong data it had</li></ul></div>";
-		//                 $_SESSION['error'] = $error;
-		//             }
-		//         }
-		//     }
-
-		//     fclose($csv_file);
-		//     unlink($csv_file_path);
-		//     $_SESSION['message'] = 'Products Imported Successfully';
-		//     redirect(base_url() . 'admin/child-sub-products');
-		// }
-		$this->_admin('child-sub-products/import');
-	}
-
+	
 	function products_sample_csv() {
 		$csv_data = array();
 		//$csv_header = array("MAIN PRODUCT NAME", "SUB PRODUCT", "PRODUCT MODEL", "MANUFACTURER NO", "HSN CODE", "MRP", "GST", "DISCOUNT", "DESCRIPTION");
@@ -476,7 +399,12 @@ class Import extends MY_Controller {
 		 
 		 //output all remaining data on a file pointer
 		 fpassthru($f);
-		 
+	}
+
+	function import_products() {
+		$data = array();
+		$this->header_data['title'] = 'Import Products'; 
+		$this->_admin('child-sub-products/import');
 	}
 	/**
 	 * @Import product using excel file or csv file
@@ -500,8 +428,9 @@ class Import extends MY_Controller {
 			if ($_FILES['import_csv']['error'] > 0) {
 				throw new Exception("FIle uploading error. Please try again.", 1);
 			}
+			$allowed_types = array('text/csv', 'application/vnd.ms-excel');
 
-			if ($_FILES['import_csv']['type'] !== 'text/csv') {
+			if (!in_array($_FILES['import_csv']['type'], $allowed_types)) {
 				throw new Exception("Please upload only CSV file.", 1);
 			}
 
@@ -563,14 +492,7 @@ class Import extends MY_Controller {
 			$file = fopen($inputFileName, "r");
 			$done = TRUE;
 			$error_array = array();
-			/**** First get all product name from database ****/
-			$products = $this->master_model->select_data("product_id,LCASE(product_name) name,is_active", "tbl_products");
-
-			/**** Create single array of product name ****/
-			$productsNameArray = array_column($products, 'name');
-			$productsIdArray = array_column($products, 'product_id');
-
-			$productsArr = array_combine($productsNameArray, $productsIdArray);
+			$this->load->model("product");
 
 			$firt_row = true;
 			while (!feof($file)) {
@@ -588,57 +510,45 @@ class Import extends MY_Controller {
 					continue;
 				}
 
-				if (array_key_exists($product_name, $productsArr)) {
-					$parent_id = $productsArr[$parent_product_name];
-				} else {
+				$model_product = $this->product->is_exits_model_product($product_name, $child_product_name, $parent_product_name);
+				
+
+				$row_data = array(
+					'product_name' => $product_name,
+					'product_url' => "#",
+					'product_logo' => (isset($row[5]) && !empty($row[5]) ? trim($row[5]) : ''),
+					'is_active' => '1',
+				);
+
+				if (empty($model_product)) {
 					$exists_row = $this->master_model->select_data_row(['product_id'], 'tbl_products', ['product_name' => $parent_product_name]);
 					if (empty($exists_row)) {
 						$parent_id = $this->dbapi->addProduct(['product_name' => $parent_product_name, 'is_active' => '1']);
 					} else {
 						$parent_id = $exists_row['product_id'];
 					}
-				}
 
-				if (array_key_exists($child_product_name, $productsArr)) {
-					$parent_id = $productsArr[$child_product_name];
-				} else {
+					$exists_row = $this->master_model->select_data_row(['product_id'], 'tbl_products', ['product_name' => $child_product_name,'parent_id' => $parent_id]);
 
-					$exists_row = $this->master_model->select_data_row(['product_id'], 'tbl_products', ['product_name' => $child_product_name]);
 					if (empty($exists_row)) {
-						$parent_id = $this->dbapi->addProduct(['product_name' => $child_product_name, 'parent_id' => $parent_id, 'is_active' => '1', 'product_logo' => (isset($row[4]) && !empty($row[4]) ? trim($row[4]) : '')]);
+						$sub_product_id = $this->dbapi->addProduct(['product_name' => $child_product_name, 'parent_id' => $parent_id, 'is_active' => '1', 'product_logo' => (isset($row[4]) && !empty($row[4]) ? trim($row[4]) : '')]);
 
 					} else {
-						$parent_id = $exists_row['product_id'];
+						$sub_product_id = $exists_row['product_id'];
 					}
-
-				}
-
-				/*** Check if exits or not ****/
-				$row_data = array(
-					'product_name' => $product_name,
-					'product_url' => "#",
-					'parent_id' => $parent_id,
-					'product_logo' => (isset($row[5]) && !empty($row[5]) ? trim($row[5]) : ''),
-					'is_active' => '1',
-				);
-
-				if (array_key_exists($product_name, $productsArr)) {
-					$product_id = $productsArr[$product_name];
-					$this->dbapi->updateProduct($row_data, $product_id);
-					$update_row++;
-					$total_row++; // print_r($row);exit;
-				} else {
-
-					$exists_row = $this->master_model->select_data_row(['product_id'], 'tbl_products', ['product_name' => $product_name]);
-					if (empty($exists_row)) {
-						$product_id = $this->dbapi->addProduct($row_data);
-					} else {
-						$parent_id = $exists_row['product_id'];
-					}
+					$row_data['parent_id'] = $sub_product_id;
+					$product_id = $this->dbapi->addProduct($row_data);
 					$insert_row++;
 					$total_row++; // print_r($row);exit;
-				}
 
+				} else {
+					$product_id  = $model_product['model_id'];
+					$row_data['parent_id'] = $model_product['sub_product_id'];
+					$this->dbapi->updateProduct($row_data, $model_product['model_id']);
+					$update_row++;
+					$total_row++; 
+				}
+				
 				if ($product_id) {
 					if (is_numeric(trim($row[13])) && $row[13] <= 1 && $row[13] >= 0) {
 						$mac_id = trim($row[13]);

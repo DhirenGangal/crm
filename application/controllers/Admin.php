@@ -306,6 +306,7 @@ class Admin extends MY_Controller {
 	}
 
 	public function child_sub_products($act = '', $str = '') {
+		$post = $this->input->post();
 		$this->header_data['title'] = "Child Sub Products";
 		_logged();
 		$data = array();
@@ -328,8 +329,6 @@ class Admin extends MY_Controller {
 			redirect(base_url() . "admin/child-sub-products/");
 		}
 		if ($act == "add") {
-			// echo "<pre>";
-			// print_r($_POST);exit;
 			$data['main_products'] = $this->dbapi->getMainProductList();
 
 			if (!empty($_POST['mproduct_name'])) {
@@ -414,20 +413,52 @@ class Admin extends MY_Controller {
 			$this->_admin('child-sub-products/form', $data);
 		} else if ($act == "edit") {
 			if (!empty($_POST['product_id'])) {
-				if (!empty($_POST['mproduct_id'])) {
-					// $this->dbapi->updateProduct(['product_name'=>$_POST['mproduct_name']],$_POST['mproduct_id']);
+
+				$this->load->model("product");
+				if (empty($post['mproduct_name']) || empty($post['sub_product_name']) || empty($post['product_name'])) {
+					$_SESSION['error'] = 'Main Product name, Sub Product Name And Model name are required';
+					redirect(base_url() .'admin/child-sub-products/edit/'.$str);
+				} 
+				
+				$product_name = $post['product_name'];
+				$child_product_name = $post['sub_product_name'];
+				$parent_product_name = $post['mproduct_name'];
+				$model_product = $this->product->is_exits_model_product($product_name, $child_product_name, $parent_product_name, $post['product_id']);
+
+				if (!empty($model_product)) {
+					$_SESSION['error'] = "Duplicate product entry";
+					redirect(base_url() .'admin/child-sub-products/edit/'.$str);
+				} 
+				/*** Check if mail product exits or no ***/
+				$exists_row = $this->master_model->select_data_row(['product_id'], 'tbl_products', ['product_name' => $parent_product_name]);
+				if (empty($exists_row)) {
+					$_POST['mproduct_id'] = $this->dbapi->addProduct(['product_name' => $parent_product_name, 'is_active' => '1']);
+				} else {
+					$_POST['mproduct_id'] = $exists_row['product_id'];
 				}
-				if (!empty($_POST['sproduct_id'])) {
-					$sproduct_name = !empty($_POST['sub_product_name']) ? trim($_POST['sub_product_name']) : '';
-					$sproduct_url = !empty($_POST['sub_product_url']) ? trim($_POST['sub_product_url']) : '#';
-					$sparent_id = !empty($_POST['mproduct_id']) ? trim($_POST['mproduct_id']) : '#';
-					$folder = 'data/sub-products/';
-					$img = '';
-					if (!empty($_FILES['sub_product_img']['name'])) {
-						// $img = imgUpload("sub_product_img", $folder, slugify($sproduct_name) . $_POST['sproduct_id']);
-					}
-					// $this->dbapi->updateProduct(['product_name'=>$sproduct_name,'parent_id'=>$sparent_id,'product_url'=>$sproduct_url,'product_logo'=>$img],$_POST['sproduct_id']);
+
+				/**** Check if sub product exits or not ****/
+
+				$exists_row = $this->master_model->select_data_row(['product_id'], 'tbl_products', ['product_name' => $child_product_name,'parent_id' => $_POST['mproduct_id']]);
+
+				if (empty($exists_row)) {
+					$_POST['sproduct_id'] = $this->dbapi->addProduct(['product_name' => $child_product_name, 'parent_id' => $_POST['mproduct_id'], 'is_active' => '1']);
+
+				} else {
+					$_POST['sproduct_id'] = $exists_row['product_id'];
 				}
+
+				$sproduct_name = !empty($_POST['sub_product_name']) ? trim($_POST['sub_product_name']) : '';
+
+				$sproduct_url = !empty($_POST['sub_product_url']) ? trim($_POST['sub_product_url']) : '#';
+				$sparent_id = !empty($_POST['mproduct_id']) ? trim($_POST['mproduct_id']) : '#';
+				$folder = 'data/sub-products/';
+				$img = '';
+				if (!empty($_FILES['sub_product_img']['name'])) {
+					// $img = imgUpload("sub_product_img", $folder, slugify($sproduct_name) . $_POST['sproduct_id']);
+				}
+				// $this->dbapi->updateProduct(['product_name'=>$sproduct_name,'parent_id'=>$sparent_id,'product_url'=>$sproduct_url,'product_logo'=>$img],$_POST['sproduct_id']);
+				
 
 				$pdata['parent_id'] = !empty($_POST['sproduct_id']) ? trim($_POST['sproduct_id']) : '';
 				$pdata['product_name'] = !empty($_POST['product_name']) ? trim($_POST['product_name']) : '';
