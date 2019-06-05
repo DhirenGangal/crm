@@ -382,4 +382,19 @@ if (!function_exists("orderFormat")) {
         return 'SCIE'. '-'.financialYear() .'/O-'. $number; //SCIE-17-18/O-001
     }
 }
+
+if (!function_exists("get_product_csv_header")) {
+
+    function get_product_csv_header()
+    {
+        return ["Main Product Name", "Sub Product", "Product Model", "Manufacture No", "Product Image", "Sub Product Image", "DataSheet", "HSN Code", "HSN Description", "GST%", "MRP", "Discount", "Price Range", "Dealer Price", "Has Mac ID", "Description", "Product Status"];
+    }
+}
+if (!function_exists("get_dealer_csv_header")) {
+
+    function get_dealer_csv_header()
+    {
+        return ["USER NAME", "FIRST NAME", "LAST NAME", "EMAIL", "COMPANY NAME", "GSTIN ", "ADDRESS", "CITY", "STATE ", "POSTAL CODE", "PHONE NO", "COUNTRY CODE", "PROFILE LOGO", "ROLE", "CREATED BY", "IS ACTIVE"];
+    }
+}
 ?>
