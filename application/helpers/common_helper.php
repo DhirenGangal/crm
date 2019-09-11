@@ -394,7 +394,213 @@ if (!function_exists("get_dealer_csv_header")) {
 
     function get_dealer_csv_header()
     {
-        return ["USER NAME", "FIRST NAME", "LAST NAME", "EMAIL", "COMPANY NAME", "GSTIN ", "ADDRESS", "CITY", "STATE ", "POSTAL CODE", "PHONE NO", "COUNTRY CODE", "PROFILE LOGO", "ROLE", "CREATED BY", "IS ACTIVE"];
+        return ["USER NAME", "FIRST NAME", "LAST NAME", "EMAIL", "COMPANY NAME", "GSTIN ", "ADDRESS", "CITY", "STATE ", "POSTAL CODE", "PHONE NO", "COUNTRY CODE", "PROFILE LOGO", "STATUS"];
+    }
+}
+
+if (!function_exists("get_main_products")) {
+
+    function get_main_products()
+    {
+        $CI = &get_instance();
+        $CI->db->select("mp.product_id, mp.product_name main_product_name");
+        $CI->db->from('tbl_products mp');
+        $CI->db->where("mp.parent_id","0");
+        $CI->db->where("mp.parent_id IN (SELECT parent_id FROM tbl_products)");
+        $query = $CI->db->get();
+        if($query) {
+            return $query->result_array();
+        }
+        else {
+            $error = $CI->db->error();
+            throw new Exception("Error [".$error['code']."] ".$error['message'], 1);
+        }
+    }
+}
+
+if (!function_exists("get_sub_products")) {
+
+    function get_sub_products($parent_id)
+    {
+        $CI = &get_instance();
+        $CI->db->select("mp.product_id, mp.product_name sub_product_name, (SELECT count(product_id) FROM tbl_products WHERE parent_id = mp.product_id AND is_active = '1') as model_cnt");
+        $CI->db->from('tbl_products mp');
+        $CI->db->where("mp.parent_id", $parent_id);
+        $CI->db->where("mp.is_active", '1');
+        $query = $CI->db->get();
+        if($query) {
+            return $query->result_array();
+        }
+        else {
+            $error = $CI->db->error();
+            throw new Exception("Error [".$error['code']."] ".$error['message'], 1);
+        }
+    }
+}
+
+if (!function_exists("get_products")) {
+
+    function get_products($parent_id)
+    {
+        $CI = &get_instance();
+        $CI->db->select("mp.product_id, mp.product_name product_name, mp.product_logo, pd.*");
+        $CI->db->from('tbl_products mp');
+        $CI->db->join('tbl_product_info pd','pd.product_id = mp.product_id','left');
+        $CI->db->where("mp.parent_id", $parent_id);
+        $CI->db->where("mp.is_active", '1');
+        $CI->db->order_by('mp.product_id','desc');
+        $query = $CI->db->get();
+        if($query) {
+            return $query->result_array();
+        }
+        else {
+            $error = $CI->db->error();
+            throw new Exception("Error [".$error['code']."] ".$error['message'], 1);
+        }
+    }
+}
+
+if (!function_exists("get_product_name")) {
+
+    function get_product_name($product_id)
+    {
+        $CI = &get_instance();
+        $CI->db->select("mp.product_name");
+        $CI->db->from('tbl_products mp');
+        $CI->db->where("mp.product_id", $product_id);
+        $CI->db->where("mp.is_active", '1');
+        $CI->db->limit(1);
+        $query = $CI->db->get();
+        if($query) {
+            $result = $query->row_array();
+            return ucwords(strtolower($result['product_name']));
+        }
+        else {
+            $error = $CI->db->error();
+            throw new Exception("Error [".$error['code']."] ".$error['message'], 1);
+        }
+    }
+}
+
+if (!function_exists("get_product_detail")) {
+
+    function get_product_detail($product_id)
+    {
+        $CI = &get_instance();
+        $CI->db->select("p.*, de.*, mp.product_id as mp_product_id, mp.product_name as mp_product_name, sp.product_id as sp_product_id, sp.product_name as sp_product_name");
+        $CI->db->from('tbl_products p');
+        $CI->db->join('tbl_product_info de','de.product_id = p.product_id','left');
+        $CI->db->join('tbl_products sp','sp.product_id = p.parent_id','left');
+        $CI->db->join('tbl_products mp','mp.product_id = sp.parent_id','left');
+        $CI->db->where("p.product_id", $product_id);
+        $CI->db->where("p.is_active", '1');
+        $query = $CI->db->get();
+        if($query) {
+            return $query->row_array();
+        }
+        else {
+            $error = $CI->db->error();
+            throw new Exception("Error [".$error['code']."] ".$error['message'], 1);
+        }
+    }
+}
+
+if (!function_exists("get_latest_products")) {
+
+    function get_latest_products($limit = 5)
+    {
+        $CI = &get_instance();
+        $CI->db->select("p.*, de.*, mp.product_id as mp_product_id, mp.product_name as mp_product_name, sp.product_id as sp_product_id, sp.product_name as sp_product_name");
+        $CI->db->from('tbl_products p');
+        $CI->db->join('tbl_product_info de','de.product_id = p.product_id','left');
+        $CI->db->join('tbl_products sp','sp.product_id = p.parent_id','left');
+        $CI->db->join('tbl_products mp','mp.product_id = sp.parent_id','left');
+        $CI->db->where("p.is_active", '1');
+        $CI->db->limit($limit);
+        $CI->db->order_by('p.product_id','desc');
+        $query = $CI->db->get();
+        if($query) {
+            return $query->result_array();
+        }
+        else {
+            $error = $CI->db->error();
+            throw new Exception("Error [".$error['code']."] ".$error['message'], 1);
+        }
+    }
+}
+
+if (!function_exists("find_products")) {
+
+    function find_products($where = '')
+    {
+        $CI = &get_instance();
+        $CI->db->select("p.*, de.*, mp.product_id as mp_product_id, mp.product_name as mp_product_name, sp.product_id as sp_product_id, sp.product_name as sp_product_name");
+        $CI->db->from('tbl_products p');
+        $CI->db->join('tbl_product_info de','de.product_id = p.product_id','left');
+        $CI->db->join('tbl_products sp','sp.product_id = p.parent_id','left');
+        $CI->db->join('tbl_products mp','mp.product_id = sp.parent_id','left');
+        $CI->db->where("p.is_active", '1');
+        // $CI->db->limit($limit);
+        if (isset($where['keyword']) && trim($where['keyword']) != '') { 
+            $CI->db->like('p.product_name',$where['keyword'],'both');
+        }
+
+        if (isset($where['price_from']) && $where['price_from'] > 0) {
+            $CI->db->where('de.mrp_price >= '. $where['price_from']);
+        }
+
+        if (isset($where['price_to']) && $where['price_to'] > 0) {
+            $CI->db->where('de.mrp_price <= '. $where['price_to']);
+        }
+
+        $CI->db->order_by('p.product_id','desc');
+        $query = $CI->db->get();
+        if($query) {
+            return $query->result_array();
+        }
+        else {
+            $error = $CI->db->error();
+            throw new Exception("Error [".$error['code']."] ".$error['message'], 1);
+        }
+    }
+}
+
+if ( ! function_exists('show_alert')) 
+{
+    function show_alert($message, $type="success")
+    {
+        if($type == 'error') {
+            $type = 'danger';
+        }
+
+        $class='';
+        if($type=='success')
+            $class="fa fa-check";
+        elseif($type=='danger')
+            $class="fa fa-exclamation-circle";
+        elseif($type=='warning')
+            $class="fa fa-exclamation-triangle";
+        elseif($type=='info')
+            $class="fa fa-info-circle";
+
+        $CI = & get_instance();
+        $CI->session->set_flashdata("alert", "
+        <div class='alert alert-$type fade in'>
+            <span class='close' data-dismiss='alert'>×</span>
+            <p><i class='$class pull-left'></i>  $message</p>
+        </div>");
+    }
+}
+
+if ( ! function_exists('is_user_login')) 
+{
+    function is_user_login()
+    {
+        $CI = &get_instance();
+        if ($CI->session->has_userdata('user')) {
+            return true;
+        }
+        return false;
     }
 }
 ?>

@@ -11,8 +11,7 @@ class MY_Controller extends CI_Controller
         parent::__construct();
         $this->_REQ = $_POST + $_GET;
         $this->load->helper('common');
-        $this->header_data['title']="SCIE Technologies";
-
+        $this->header_data['title']="VSCI-E Technologies";
     }
 
     public function _user_login_check($roles = array(""))
@@ -107,9 +106,9 @@ class MY_Controller extends CI_Controller
     }
     public function _home($page_name = 'index', $data = array())
     {
-        $this->load->view('header', $this->header_data);
+        $this->load->view('header', $data);
         $this->load->view($page_name, $data);
-        $this->load->view('footer',$this->header_data);
+        $this->load->view('footer',$data);
     }
 
 }

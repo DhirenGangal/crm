@@ -26,6 +26,8 @@
                         <th>S.No</th>
                         <th>Dealer Name</th>
                         <th>Phone</th>
+                        <th>Email</th>
+                        <th>GSTIN</th>
                         <th>Action</th>
                     </tr>
                     </thead>
@@ -37,6 +39,8 @@
                                 <td><?php echo $i; ?></td>
                                 <td><?php echo !empty($dealer['user_name']) ? $dealer['user_name'] : ""; ?></td>
                                 <td><?php echo !empty($dealer['phone_no']) ? $dealer['phone_no'] : ""; ?></td>
+                                <td><?php echo !empty($dealer['email']) ? $dealer['email'] : ""; ?></td>
+                                <td><?php echo !empty($dealer['gstin']) ? $dealer['gstin'] : ""; ?></td>
                                 <td class="">
                                     <a data-toggle="tooltip" data-placement="bottom" href="<?php echo base_url() ?>admin/dealers/edit/<?php echo $dealer['member_id']; ?>" title='Edit' class="btn btn-sm btn-default"><i class="fa fa-pencil text-info"></i></a>
                                     <a data-toggle="tooltip" data-placement="bottom" href="javascript:void(0)" data-id="<?php echo $dealer['member_id']; ?>" title='View' class="btn btn-sm btn-default view-details"><i class="fa fa-eye text-warning"></i></a>

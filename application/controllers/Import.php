@@ -279,7 +279,7 @@ class Import extends MY_Controller {
 	 * @email : dhiraj.gangal@gmail.com
 	 * @date : 06-Jun-2019
 	 */
-	public function export_dealers() {
+	public function export_dealers($data = '') {
 		$filename = "Dealers-" . date('d-m-Y').".csv";
 		$this->load->model("product");
 		$result = $this->dbapi->searchUsers(["role" => "DEALER"]);
@@ -288,12 +288,26 @@ class Import extends MY_Controller {
 		$f = fopen('php://memory', 'w');
 		fputcsv($f, $fields, $delimiter);
 		foreach ($result as $key => $row) {
+			$avatar_path = !empty($row['profile_logo']) ? $row['profile_logo'] : '#';
+			$status = $row['is_active'] == '1' ? 'PUBLIC' : 'PRIVATE';
 			$schema_insert = array(
-				$row['member_id'], $row['user_name'], $row['first_name'] . ' ' . $row['last_name'], $row['email'], $row['company_name'], $row['gstin'], $row['address'], $row['city'], $row['state'], $row['postal_code'], $row['phone_no'], $row['country_code'], $row['role']
+				$row['user_name'], 
+				$row['first_name'],
+				$row['last_name'],
+				$row['email'], 
+				$row['company_name'], 
+				$row['gstin'], 
+				$row['address'], 
+				$row['city'], 
+				$row['state'], 
+				$row['postal_code'], 
+				$row['phone_no'], 
+				$row['country_code'], 
+				$avatar_path,
+				$status
 			);
 			fputcsv($f, $schema_insert, $delimiter);
 		}
-
 		 //move back to beginning of file
 		 fseek($f, 0);
 		 //set headers to download file rather than displayed
@@ -317,41 +331,126 @@ class Import extends MY_Controller {
 			@move_uploaded_file($_FILES["import_csv"]["tmp_name"], $csv_file_path);
 			$csv_file = fopen($csv_file_path, "r");
 			fgetcsv($csv_file);
+
+			$exits_email = $this->master_model->select_data('email','tbl_members',['role'=>'DEALER']);
+			$exits_email = array_column($exits_email, 'email');
+			$firt_row = true;
+			$total_row = 0;
+			$duplicate_emails = [];
+			$insert_array = [];
+			$update_array = [];
+			$error_row = [];
 			while (!feof($csv_file)) {
 				$row = fgetcsv($csv_file);
-				if (!empty($row[1])) {
-					$pData = [];
-					$pData['user_name'] = !empty($row[0]) ? $row[0] : "";
-					$pData['first_name'] = !empty($row[1]) ? $row[1] : "";
-					$pData['last_name'] = !empty($row[2]) ? $row[2] : "";
-					$email = !empty($row[3]) ? $row[3] : "";
-					$pData['email'] = $email;
-					$pData['company_name'] = !empty($row[4]) ? $row[4] : "";
-					$pData['gstin'] = !empty($row[5]) ? $row[5] : "";
-					$pData['address'] = !empty($row[6]) ? $row[6] : "";
-					$pData['city'] = !empty($row[7]) ? $row[7] : "";
-					$pData['state'] = !empty($row[8]) ? $row[8] : "";
-					$pData['postal_code'] = !empty($row[9]) ? $row[9] : "";
-					$pData['phone_no'] = !empty($row[10]) ? $row[10] : "";
-					$pData['country_code'] = !empty($row[11]) ? $row[11] : "";
-					$pData['profile_logo'] = !empty($row[12]) ? $row[12] : "";
-					$pData['role'] = !empty($row[13]) ? $row[13] : "";
-					$pData['created_by'] = !empty($row[14]) ? $row[14] : "";
-					$pData['is_active'] = !empty($row[15]) ? $row[15] : "";
-					if (!$this->dbapi->checkMemberExists($email)) {
-						$this->dbapi->addUser($pData);
-					} else {
-						$error = "";
-						$error .= "Failed to import data because of following reasons";
-						$error .= "<div class='container'><ul><li>1.Field  already exists  !</li>";
-						$error .= "<li>2.CSV data mismatched or something wrong data it had</li></ul></div>";
-						$_SESSION['error'] = $error;
-					}
+				$user_name = trim($row[0]);
+				if ($firt_row && strtolower($user_name) == 'user name') {
+					$firt_row = false;
+					continue;
+				}
+				if($row[0]=='') {
+					continue;
+				}
+				$total_row ++;
+				
+				$email = !empty($row[3]) ? $row[3] : "";
+				$pData = [];
+				$pData['user_name'] = !empty($row[0]) ? $row[0] : "";
+				$pData['first_name'] = !empty($row[1]) ? $row[1] : "";
+				$pData['last_name'] = !empty($row[2]) ? $row[2] : "";
+				$pData['email'] = $email;
+				$pData['company_name'] = !empty($row[4]) ? $row[4] : "";
+				$pData['gstin'] = !empty($row[5]) ? $row[5] : "";
+				$pData['address'] = !empty($row[6]) ? $row[6] : "";
+				$pData['city'] = !empty($row[7]) ? $row[7] : "";
+				$pData['state'] = !empty($row[8]) ? $row[8] : "";
+				$pData['postal_code'] = !empty($row[9]) ? $row[9] : "";
+				$pData['phone_no'] = !empty($row[10]) ? $row[10] : "";
+				$pData['country_code'] = !empty($row[11]) ? $row[11] : "";
+				$pData['profile_logo'] = !empty($row[12]) ? $row[12] : "";
+				$pData['role'] = 'DEALER';
+				$pData['created_by'] = '1';
+				$is_active = "0";
+				if (isset($row[13])) {
+					if($row[13] == '1' || strtolower($row[13]) == 'public') {
+						$is_active = '1';
+					} 
+				}
+
+				$pData['is_active'] = $is_active;
+				// echo "<pre>";
+				// print_r($row);
+				// print_r($pData);exit;
+				if(empty($email)) {
+					$error_row[] = $pData;
+					continue;
+				}
+				if (in_array($email, $exits_email)){
+					$update_array[] = $pData;
+				} else {
+					$insert_array[] = $pData;
 				}
 			}
 			fclose($csv_file);
 			unlink($csv_file_path);
-			$_SESSION['message'] = 'Dealers Imported Successfully';
+			if (!empty($insert_array)) {
+				$this->master_model->insert_batch_data('tbl_members', $insert_array);
+			}
+			if (!empty($update_array)) {
+				$this->master_model->update_batch_data('tbl_members', $update_array,'email');	 
+			}
+			
+			
+			$massage = "";
+			if (!empty($insert_array)) { 
+				$massage .= "<p>".count($insert_array). " Out of $total_row Inserted Successfully.<p>";
+			}
+			if (!empty($update_array)) { 
+				$massage .= "<p>".count($update_array). " Out of $total_row Updated Successfully.<p>";
+			}
+
+			if (!empty($error_row)) {
+
+				$error = "";
+				$file_path = FCPATH . '/data/tmp/Dealers-Error.csv';
+				$error .= "Failed to import data because of following reasons";
+				$error .= "<div class='container'><ul><li>Total ".count($error_row)." row dos not exits email address.!</li>";
+				$error .= "<li> <a href='".base_url('/data/tmp/Dealers-Error.csv')."' target='_blank'>Clike here</a> to download error file and review mismatched data and upload again</li></ul></div>";
+				$_SESSION['error'] = $error;
+				$result = $error_row;
+				$delimiter = ",";
+				$fields = get_dealer_csv_header();
+				$f = fopen($file_path, 'w');
+				fputcsv($f, $fields, $delimiter);
+				foreach ($result as $key => $row) {
+					$avatar_path = !empty($row['profile_logo']) ? $row['profile_logo'] : '#';
+					$status = $row['is_active'] == '1' ? 'PUBLIC' : 'PRIVATE';
+					$schema_insert = array(
+						$row['user_name'], 
+						$row['first_name'],
+						$row['last_name'],
+						$row['email'], 
+						$row['company_name'], 
+						$row['gstin'], 
+						$row['address'], 
+						$row['city'], 
+						$row['state'], 
+						$row['postal_code'], 
+						$row['phone_no'], 
+						$row['country_code'], 
+						$avatar_path,
+						$status
+					);
+					fputcsv($f, $schema_insert, $delimiter);
+				}
+				 //move back to beginning of file
+				 // fseek($f, 0);
+				 //set headers to download file rather than displayed
+				 // header('Content-Type: text/csv');
+				 // header('Content-Disposition: attachment; filename="' . $filename . '";');
+				 //output all remaining data on a file pointer
+				 fpassthru($f);
+			}
+			$_SESSION['message'] = $massage;
 			redirect(base_url() . 'admin/dealers');
 		}
 		$this->_admin('dealers/import');
